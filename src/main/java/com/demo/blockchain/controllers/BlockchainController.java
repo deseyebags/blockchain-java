@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.demo.blockchain.models.Block;
 import com.demo.blockchain.models.Blockchain;
+import com.demo.blockchain.services.BlockchainService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,30 +15,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path ="/api/blockchain")
+@RequestMapping("/api/blockchain")
 public class BlockchainController {
-
-    private final Blockchain blockchain;
-
-    public BlockchainController() throws NoSuchAlgorithmException {
-        this.blockchain = new Blockchain();   // constructor that throws
-    }
+    private final BlockchainService service;
     
+    public BlockchainController(BlockchainService service) {
+        this.service = service;
+    }
     
     @GetMapping("/chain")
     public List<Block> getChain() {
-        return blockchain.getBlocks();
+        return service.getChain();
     }
     
     @PostMapping("/mine")
-    public ResponseEntity<Block> mineBlock(@RequestBody String data) throws Exception {
-        blockchain.addBlock(data);
-        Block lastBlock = blockchain.getBlocks().get(blockchain.getBlocks().size() - 1);
-        return ResponseEntity.ok(lastBlock);
+    public ResponseEntity<?> mineBlock(@RequestBody String data)  {
+       try {
+            return ResponseEntity.ok(service.mineBlock(data));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     
     @GetMapping("/valid")
     public ResponseEntity<String> isValid() {
-        return ResponseEntity.ok(blockchain.isValid() ? "VALID" : "INVALID");
+        return ResponseEntity.ok(service.isValid() ? "VALID" : "INVALID");
     }
 }

@@ -7,17 +7,30 @@ import java.util.List;
 public class Blockchain {
     private List<Block> blocks;
 
-    public Blockchain()  throws NoSuchAlgorithmException {
+    public Blockchain() {
         blocks = new ArrayList<>();
         Block genesis = new Block(0, "Genesis Block", "0");
-        genesis.mineBlock(2);
+        try{
+            genesis.mineBlock(2);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+         
         blocks.add(genesis);  
     }
 
-    public void addBlock(String data) throws NoSuchAlgorithmException {
+    public void addBlock(String data)  {
+        if (data == null || data.trim().isEmpty()) {
+        throw new IllegalArgumentException("Transaction data cannot be empty");
+    }
         Block lastBlock = blocks.get(blocks.size() - 1);
         Block new_block = new Block(blocks.size(), data, lastBlock.getHash());
-        new_block.mineBlock(2);
+        try {
+            new_block.mineBlock(2);
+        } catch (NoSuchAlgorithmException e) {
+           throw new RuntimeException("Mining failed - SHA-256 unavailable", e);
+        }
+
         blocks.add(new_block);
     }
 
